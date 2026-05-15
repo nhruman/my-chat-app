@@ -9,25 +9,61 @@
 <body>
 
   <video autoplay muted loop id="bg-video" style="position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%; z-index: -1; object-fit: cover;">
-        <source src="video/butterfly.mp4" type="video/mp4">
-    </video>
+    <source src="video/butterfly.mp4" type="video/mp4">
+  </video>
 
-
-<div class="chat-container">
-
-  <h1>Private Chat</h1>
-
-  <div id="chat-box"></div>
-  
-<div class="input-area">
-    <input type="text" id="message" placeholder="Write message..." onkeypress="if(event.key === 'Enter') sendMessage()">
-    <button onclick="sendMessage()">Send</button>
+  <div class="chat-container">
+    <h1>Private Chat</h1>
+    <div id="chat-box"></div>
+    <div class="input-area">
+      <input type="text" id="message" placeholder="Write message..." onkeypress="if(event.key === 'Enter') sendMessage()">
+      <button onclick="sendMessage()">Send</button>
+    </div>
   </div>
 
-</div>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-<script type="module" src="firebase.js"></script>
-<script type="module" src="app.js"></script>
+  <script>
+    // আপনার Firebase Config (স্ক্রিনশট থেকে পাওয়া)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDf8QPGWVbqbFtkfjv2xoRCZUeRcJ6Ym0",
+      authDomain: "my-chat-app-9d51c.firebaseapp.com",
+      databaseURL: "https://my-chat-app-9d51c-default-rtdb.firebaseio.com",
+      projectId: "my-chat-app-9d51c",
+      storageBucket: "my-chat-app-9d51c.firebasestorage.app",
+      messagingSenderId: "644218222140",
+      appId: "1:644218222140:web:a795eec54553a9e1957539"
+    };
+
+    // Firebase চালু করা
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // মেসেজ পাঠানোর ফাংশন
+    function sendMessage() {
+      const input = document.getElementById('message');
+      const text = input.value;
+      if (text !== "") {
+        db.ref("messages").push().set({
+          message: text,
+          time: Date.now()
+        });
+        input.value = ""; // মেসেজ পাঠানোর পর বক্স খালি হবে
+      }
+    }
+
+    // মেসেজ রিসিভ করা এবং স্ক্রিনে দেখানো
+    db.ref("messages").on("child_added", (snapshot) => {
+      const data = snapshot.val();
+      const chatBox = document.getElementById("chat-box");
+      const msgDiv = document.createElement("div");
+      msgDiv.className = "message";
+      msgDiv.innerText = data.message;
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight; // নতুন মেসেজ আসলে অটো নিচে নামবে
+    });
+  </script>
 
 </body>
 </html>
